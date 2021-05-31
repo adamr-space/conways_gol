@@ -7,7 +7,7 @@ let h = 0;
 const alive = 1; // a live pixel
 const dead = 0; // a dead pixel
 
-const svgDiv = document.querySelector("#image");
+const svgDiv = document.querySelector("#svg-container");
 const status = document.getElementById("status");
 const size = document.getElementById("cellSize");
 
@@ -75,73 +75,45 @@ const sizeChange = () => {
   if (!flags.running) init();
 };
 
-// create SVG rectangle
-const createSVGRect = (settings) => {
-  let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  for (const key in settings) {
-    rect.setAttribute(String(key), settings[key]);
-  }
-  return rect;
-};
-
-//create SVG line
-const createSVGLine = (settings) => {
-  let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  for (const key in settings) {
-    line.setAttribute(String(key), settings[key]);
-  }
-  return line;
+//create SVG element
+const createSVGElement = (settings, tag, add) => {
+  let element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const key in settings) element.setAttribute(String(key), settings[key]);
+  if (add) add.appendChild(element);
+  return element;
 };
 
 //get cell coordinates from index
 const getCoords = (idx) => ({ x: (idx % svgWidth) * cellSize, y: parseInt(idx / svgWidth) * cellSize });
 
 //creae live SVG rectangle representing cell
-const makeLiveCell = (idx) => {
+const makeLiveCell = (idx, g) => {
   const coords = getCoords(idx);
-  return createSVGRect({ x: coords.x, y: coords.y, width: sideSize, height: sideSize, fill: "royalblue" });
+  return createSVGElement({ x: coords.x, y: coords.y, width: sideSize, height: sideSize }, "rect", g);
 };
 
-//generate horizontal and vertical lines
+//generate horizontal and vertical grid lines
 const makeGrid = (svg) => {
-  for (let index = 0; index < svgWidth + 1; index++) {
-    const pos = index * cellSize;
-    const line = createSVGLine({
-      x1: pos,
-      x2: pos,
-      y1: 0,
-      y2: "100%",
-      stroke: "gray",
-    });
-    svg.appendChild(line);
-  }
-  for (let index = 0; index < svgHeight + 1; index++) {
-    const pos = index * cellSize;
-    const line = createSVGLine({
-      x1: 0,
-      x2: "100%",
-      y1: pos,
-      y2: pos,
-      stroke: "gray",
-    });
-    svg.appendChild(line);
+  let g = createSVGElement({ stroke: "gray", id: "grid" }, "g", svg);
+  const grid = [svgWidth, svgHeight];
+  let s;
+  for (const orinetation of grid) {
+    for (let index = 0; index < orinetation + 1; index++) {
+      const pos = index * cellSize;
+      if (orinetation == svgWidth) s = { x1: pos, x2: pos, y1: 0, y2: "100%" };
+      else s = { x1: 0, x2: "100%", y1: pos, y2: pos };
+      createSVGElement(s, "line", g);
+    }
   }
 };
 
 //displays the cells
 function showlife() {
   svgDiv.innerHTML = ""; //dropp current SVG
-  let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("width", w);
-  svg.setAttribute("height", h);
-
-  let rect = createSVGRect({ x: 0, y: 0, width: w, height: h, fill: "whitesmoke" });
-  svg.appendChild(rect);
-
-  for (const [i, cell] of cells.entries()) {
-    if (cell == alive) svg.appendChild(makeLiveCell(i));
-  }
-
+  let svg = createSVGElement({ width: w, height: h }, "svg");
+  createSVGElement({ x: 0, y: 0, width: w, height: h, fill: "whitesmoke" }, "rect", svg);
+  let g = createSVGElement({ fill: "royalblue", id: "cells" }, "g", svg);
+  for (const [i, cell] of cells.entries()) if (cell == alive) makeLiveCell(i, g);
   if (cellSize > 3) makeGrid(svg); //create grid only if cellSize is not min
   svgDiv.appendChild(svg);
 }
