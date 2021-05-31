@@ -1,0 +1,55 @@
+.control-panel {
+  width: 30vw;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+}
+
+#image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button,
+label,
+input {
+  margin-inline: 1vw;
+  flex: 1 1 4vw;
+}
+
+label {
+  margin-right: -1.2vw;
+}
+
+#status {
+  flex-basis: 4vw;
+  padding: 0.1em;
+}
+
+#status[data-status="Paused"] {
+  background-color: orange;
+}
+
+#status[data-status="Running"] {
+  background-color: green;
+}
+
+#status[data-status="Resumed"] {
+  background-color: green;
+}
+#status[data-status="Reset"] {
+  background-color: red;
+}
+
+#title {
+  display: flex;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+}

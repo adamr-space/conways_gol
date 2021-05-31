@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conway's Game of Life SVG implementation by Adam R.</title>
+    <script src="./assets/js/app.js" defer></script>
+    <link rel="stylesheet" href="./assets/css/main.css">
+</head>
+
+<body>
+    <div id="title"><a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank">
+            <h1>Conway's Game of Life</h1>
+        </a></div>
+    <div class="control-panel">
+        <button id="start">Start</button>
+        <button id="pause">Pause</button>
+        <button id="reset">Reset</button>
+        <p id="status" data-status="Reset">Reset</p>
+        <label for="cellSize">Cell size:</label>
+        <input type="number" name="cellSize" id="cellSize" min="3" , max="25" , step="2" , value="7"
+            onchange="sizeChange()">
+    </div>
+    <div id="image">
+    </div>
+</body>
+
+</html>
