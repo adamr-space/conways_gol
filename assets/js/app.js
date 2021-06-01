@@ -130,7 +130,6 @@ const takeAction = (btn) => {
 const bitArray = (bitCount) => ({
   bits: new Uint32Array(Math.ceil(bitCount / 32)),
   alive(i) {
-    this.bits;
     const bigIndex = Math.floor(i / 32);
     const smallIndex = i % 32;
     this.bits[bigIndex] = this.bits[bigIndex] | (1 << smallIndex);
