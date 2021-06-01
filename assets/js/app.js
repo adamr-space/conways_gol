@@ -127,6 +127,33 @@ const takeAction = (btn) => {
   }
 };
 
+const bitArray = (bitCount) => ({
+  bits: new Uint32Array(Math.ceil(bitCount / 32)),
+  alive(i) {
+    this.bits;
+    const bigIndex = Math.floor(i / 32);
+    const smallIndex = i % 32;
+    this.bits[bigIndex] = this.bits[bigIndex] | (1 << smallIndex);
+  },
+  dead(i) {
+    const bigIndex = Math.floor(i / 32);
+    const smallIndex = i % 32;
+    this.bits[bigIndex] = this.bits[bigIndex] & ~(1 << smallIndex);
+  },
+  isAlive(i) {
+    const bigIndex = Math.floor(i / 32);
+    const smallIndex = i % 32;
+    const value = this.bits[bigIndex] & (1 << smallIndex);
+    return value != 0;
+  },
+  get length() {
+    return this.bits.length;
+  },
+  get bitsLength() {
+    return this.bits.length * 32;
+  },
+});
+
 //creating button click handlers
 document.querySelectorAll("button").forEach((btn) => btn.addEventListener("click", takeAction));
 
@@ -136,18 +163,18 @@ const init = () => {
   svgWidth = parseInt(w / cellSize);
   svgHeight = parseInt(h / cellSize);
   sideSize = cellSize - 1;
-  cells = new Array(svgHeight * svgWidth);
-  next = new Array(svgHeight * svgWidth);
+  cells = bitArray(svgHeight * svgWidth);
+  next = bitArray(svgHeight * svgWidth);
   fillSVG();
 };
 
 //random fill array
 const randomFill = () => {
-  for (let i = 0; i < cells.length; i++) {
+  for (let i = 0; i < cells.bitsLength; i++) {
     if (Math.random() > 0.8) {
-      cells[i] = alive; //20% chance of being alive
+      cells.alive(i); //20% chance of being alive
     } else {
-      cells[i] = dead;
+      cells.dead(i);
     }
   }
 };
@@ -194,8 +221,8 @@ const inject = () => {
     }
     const idx = parseInt(startW + (index % 41) + line * svgWidth);
     if (conways[index] == alive) {
-      cells[idx] = alive;
-    } else cells[idx] = dead;
+      cells.alive(idx);
+    } else cells.dead(idx);
   }
 };
 
@@ -227,22 +254,21 @@ function showlife(rendering) {
     g = createSVGElement({ fill: "royalblue", id: "cells" }, "g", svg);
     if (cellSize > 3) makeGrid(svg); //create grid only if cellSize is not min
   }
-  for (const [i, cell] of cells.entries()) if (cell == alive) makeLiveCell(i, g);
+  for (let i = 0; i < cells.bitsLength; i++) if (cells.isAlive(i)) makeLiveCell(i, g);
 }
 
 //create SVG frame
 const frame = () => {
   const w = svgWidth;
-  for (const [i, cell] of cells.entries()) {
-    const neighbours = [i - w - 1, i - w, i - w + 1, i - 1, i + 1, i + w - 1, i + w, i + w + 1].map(
-      (permuation) => cells[permuation]
+  for (let i = 0; i < cells.bitsLength; i++) {
+    const neighbours = [i - w - 1, i - w, i - w + 1, i - 1, i + 1, i + w - 1, i + w, i + w + 1].map((permuation) =>
+      cells.isAlive(permuation)
     );
     const populationSize = neighbours.reduce((acc, cell) => acc + cell, 0);
-    next[i] = (populationSize === 2 && cell) || populationSize === 3 ? alive : dead;
+    if ((populationSize === 2 && cells.isAlive(i)) || populationSize === 3) next.alive(i);
+    else next.dead(i);
   }
-  for (let i = 0; i < next.length; i++) {
-    cells[i] = next[i];
-  }
+  cells.bits = [...next.bits];
 };
 
 //main animation loop with events handling
