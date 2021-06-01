@@ -215,14 +215,19 @@ const makeGrid = (svg) => {
 };
 
 //displays the cells
-function showlife() {
-  svgDiv.innerHTML = ""; //dropp current SVG
-  let svg = createSVGElement({ width: w, height: h }, "svg");
-  createSVGElement({ x: 0, y: 0, width: w, height: h, fill: "whitesmoke" }, "rect", svg);
-  let g = createSVGElement({ fill: "royalblue", id: "cells" }, "g", svg);
+function showlife(rendering) {
+  let g, svg;
+  if (rendering) {
+    g = document.getElementById("cells");
+    g.innerHTML = ""; // for (const rect of [...g.children]) rect.remove(); innerHTML method is faster
+  } else {
+    svgDiv.innerHTML = ""; //dropp current SVG
+    svg = createSVGElement({ width: w, height: h, id: "main" }, "svg", svgDiv);
+    createSVGElement({ x: 0, y: 0, width: w, height: h, fill: "whitesmoke" }, "rect", svg);
+    g = createSVGElement({ fill: "royalblue", id: "cells" }, "g", svg);
+    if (cellSize > 3) makeGrid(svg); //create grid only if cellSize is not min
+  }
   for (const [i, cell] of cells.entries()) if (cell == alive) makeLiveCell(i, g);
-  if (cellSize > 3) makeGrid(svg); //create grid only if cellSize is not min
-  svgDiv.appendChild(svg);
 }
 
 //create SVG frame
@@ -249,7 +254,7 @@ const animate = () => {
     return;
   }
   if (!flags.pause) {
-    showlife();
+    showlife(true);
     frame();
   }
   requestAnimationFrame(animate);
