@@ -1,8 +1,9 @@
 //global variables
 let flags = { running: false, pause: false, reset: false };
-let cellSize, svgWidth, svgHeight, sideSize, cells, next;
+let cellSize, svgWidth, svgHeight, sideSize, cells, next, wM, wP, wC;
 let w = 0;
 let h = 0;
+const gpu = new GPU();
 //41*80
 const conways = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -101,8 +102,15 @@ const size = document.getElementById("cellSize");
 
 //event handler for client window resize
 const reportWindowSize = () => {
-  h = parseInt(window.innerHeight - 200);
-  w = parseInt(window.innerWidth - 200);
+  h = parseInt(window.innerHeight - 100);
+  w = parseInt(window.innerWidth - 100);
+  while ((w / size.value) % 32 != 0) {
+    w--;
+  }
+  while ((h / size.value) % 16 != 0) {
+    h--;
+  }
+  console.log(w, h);
 };
 
 //handler for button clicks in client
@@ -161,6 +169,10 @@ const init = () => {
   cellSize = size.value;
   svgWidth = parseInt(w / cellSize);
   svgHeight = parseInt(h / cellSize);
+  console.log(svgWidth, svgHeight);
+  wM = svgWidth - 1;
+  wP = svgWidth + 1;
+  wC = svgWidth;
   sideSize = cellSize - 1;
   cells = bitArray(svgHeight * svgWidth);
   next = bitArray(svgHeight * svgWidth);
@@ -208,17 +220,15 @@ const makeLiveCell = (idx, g) => {
 };
 
 const inject = () => {
-  const startH = [3, 19, 21, 25].includes(parseInt(cellSize))
-    ? (svgHeight / 2 - 40) * svgWidth
-    : (svgHeight / 2 - 40) * svgWidth + svgWidth / 2;
-  const startW = svgWidth / 2 - 20 + startH;
+  const startH = (svgHeight / 2 - 40) * svgWidth;
+  const start = svgWidth / 2 - 20 + startH;
   let line = 0;
   for (let index = 0; index < conways.length; index++) {
     if (index % 41 == 0) {
       line++;
-      startW - conways.length;
+      start - conways.length;
     }
-    const idx = parseInt(startW + (index % 41) + line * svgWidth);
+    const idx = parseInt(start + (index % 41) + line * svgWidth);
     if (conways[index] == alive) {
       cells.alive(idx);
     } else cells.dead(idx);
@@ -256,11 +266,10 @@ function showlife(rendering) {
   for (let i = 0; i < cells.bitsLength; i++) if (cells.isAlive(i)) makeLiveCell(i, g);
 }
 
-//create SVG frame
+//crate SVG frame
 const frame = () => {
-  const w = svgWidth;
   for (let i = 0; i < cells.bitsLength; i++) {
-    const neighbours = [i - w - 1, i - w, i - w + 1, i - 1, i + 1, i + w - 1, i + w, i + w + 1].map((permuation) =>
+    const neighbours = [i - wM, i - wC, i - wP, i - 1, i + 1, i + wM, i + wC, i + wP].map((permuation) =>
       cells.isAlive(permuation)
     );
     const populationSize = neighbours.reduce((acc, cell) => acc + cell, 0);

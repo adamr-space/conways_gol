@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conway's Game of Life SVG implementation by Adam R.</title>
+    <script src="https://cdn.jsdelivr.net/npm/gpu.js@latest/dist/gpu-browser.min.js" defer></script>
     <script src="./assets/js/app.js" defer></script>
     <link rel="stylesheet" href="./assets/css/main.css">
 </head>
@@ -20,7 +21,7 @@
         <button id="reset">Reset</button>
         <p id="status" data-status="Reset">Reset</p>
         <label for="cellSize">Cell size:</label>
-        <input type="number" name="cellSize" id="cellSize" min="3" , max="25" , step="2" , value="7"
+        <input type="number" name="cellSize" id="cellSize" min="2" , max="25" , step="2" , value="6"
             onchange="sizeChange()">
     </div>
     <div id="svg-container">

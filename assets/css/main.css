@@ -1,12 +1,13 @@
 .control-panel {
   width: 30vw;
-  margin: 0 auto;
+  margin: 0.7em auto 0 auto;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   align-content: center;
   justify-content: center;
   align-items: center;
+  height: 2em;
 }
 
 #svg-container {
@@ -52,4 +53,5 @@ label {
   align-content: center;
   justify-content: center;
   align-items: center;
+  height: 1em;
 }
