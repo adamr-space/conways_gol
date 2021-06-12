@@ -3,7 +3,7 @@ let flags = { running: false, pause: false, reset: false };
 let cellSize, svgWidth, svgHeight, sideSize, cells, next, wM, wP, wC;
 let w = 0;
 let h = 0;
-const gpu = new GPU();
+
 //41*80
 const conways = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -266,17 +266,42 @@ function showlife(rendering) {
   for (let i = 0; i < cells.bitsLength; i++) if (cells.isAlive(i)) makeLiveCell(i, g);
 }
 
-//crate SVG frame
+const cpuTask = (arr, twos, threes) => {
+  for (let i = 0; i < arr.length; i++) {
+    let sum = 0;
+    for (let j = 0; j < 8; j++) {
+      sum += arr[i][j];
+      if (sum > 3) break;
+    }
+    if (sum == 2) twos.alive(i);
+    if (sum == 3) threes.alive(i);
+  }
+};
+
+const calc = (a, two, three) => three | (a & two);
+
+//create SVG frame
 const frame = () => {
+  console.time("frame");
+  const arr = [];
   for (let i = 0; i < cells.bitsLength; i++) {
     const neighbours = [i - wM, i - wC, i - wP, i - 1, i + 1, i + wM, i + wC, i + wP].map((permuation) =>
       cells.isAlive(permuation)
     );
-    const populationSize = neighbours.reduce((acc, cell) => acc + cell, 0);
-    if ((populationSize === 2 && cells.isAlive(i)) || populationSize === 3) next.alive(i);
-    else next.dead(i);
+    arr.push(neighbours);
   }
-  cells.bits = [...next.bits];
+  const twos = bitArray(cells.bitsLength);
+  const threes = bitArray(cells.bitsLength);
+  cpuTask(arr, twos, threes);
+
+  for (let i = 0; i < cells.bitsLength; i++) {
+    const alive = cells.bits[i];
+    const tw = twos.bits[i];
+    const thr = threes.bits[i];
+    next.bits[i] = calc(alive, tw, thr);
+  }
+  cells.bits = next.bits;
+  console.timeEnd("frame");
 };
 
 //main animation loop with events handling
